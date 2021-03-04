@@ -524,6 +524,12 @@ QString Utils::OBSVersionString() {
 
 QSystemTrayIcon* Utils::GetTrayIcon() {
 	void* systemTray = obs_frontend_get_system_tray();
+	if (!systemTray) {
+		blog(LOG_INFO, "gettrayicon is nullptr!");
+		return nullptr;
+	} else {
+		blog(LOG_INFO, "gettrayicon is NOT nullptr");
+	}
 	return reinterpret_cast<QSystemTrayIcon*>(systemTray);
 }
 

@@ -231,6 +231,7 @@ void WSEvents::FrontendEventHandler(enum obs_frontend_event event, void* private
 			break;
 
 		case OBS_FRONTEND_EVENT_EXIT:
+			blog(LOG_INFO, "OBS_FRONTEND_EVENT_EXIT received.");
 			owner->unhookTransitionPlaybackEvents();
 			owner->OnExit();
 			owner->_srv->stop();
@@ -241,6 +242,10 @@ void WSEvents::FrontendEventHandler(enum obs_frontend_event event, void* private
 void WSEvents::broadcastUpdate(const char* updateType,
 	obs_data_t* additionalFields = nullptr)
 {
+	if (!_srv->isListening()) {
+		blog(LOG_INFO, "Update type of '%s' was ignored due to obs-websocket not in listening mode.", updateType);
+		return;
+	}
 	std::optional<uint64_t> streamTime;
 	if (obs_frontend_streaming_active()) {
 		streamTime = std::make_optional(getStreamingTime());
