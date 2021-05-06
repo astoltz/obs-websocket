@@ -142,6 +142,7 @@ You can also refer to any of the client libraries listed on the [README](README.
     + [TriggerHotkeyByName](#triggerhotkeybyname)
     + [TriggerHotkeyBySequence](#triggerhotkeybysequence)
     + [ExecuteBatch](#executebatch)
+    + [Sleep](#sleep)
   * [Media Control](#media-control)
     + [PlayPauseMedia](#playpausemedia)
     + [RestartMedia](#restartmedia)
@@ -160,9 +161,12 @@ You can also refer to any of the client libraries listed on the [README](README.
     + [GetSourceTypesList](#getsourcetypeslist)
     + [GetVolume](#getvolume)
     + [SetVolume](#setvolume)
+    + [SetTracks](#settracks)
+    + [GetTracks](#gettracks)
     + [GetMute](#getmute)
     + [SetMute](#setmute)
     + [ToggleMute](#togglemute)
+    + [GetSourceActive](#getsourceactive)
     + [GetAudioActive](#getaudioactive)
     + [SetSourceName](#setsourcename)
     + [SetSyncOffset](#setsyncoffset)
@@ -301,6 +305,7 @@ These are complex types, such as `Source` and `Scene`, which are used as argumen
 | `rotation` | _double_ | The clockwise rotation of the scene item in degrees around the point of alignment. |
 | `scale.x` | _double_ | The x-scale factor of the scene item. |
 | `scale.y` | _double_ | The y-scale factor of the scene item. |
+| `scale.filter` | _String_ | The scale filter of the source. Can be "OBS_SCALE_DISABLE", "OBS_SCALE_POINT", "OBS_SCALE_BICUBIC", "OBS_SCALE_BILINEAR", "OBS_SCALE_LANCZOS" or "OBS_SCALE_AREA". |
 | `crop.top` | _int_ | The number of pixels cropped off the top of the scene item before scaling. |
 | `crop.right` | _int_ | The number of pixels cropped off the right of the scene item before scaling. |
 | `crop.bottom` | _int_ | The number of pixels cropped off the bottom of the scene item before scaling. |
@@ -343,7 +348,7 @@ These are complex types, such as `Source` and `Scene`, which are used as argumen
 | `flags.encoded` | _boolean_ | Output is encoded |
 | `flags.multiTrack` | _boolean_ | Output uses several audio tracks |
 | `flags.service` | _boolean_ | Output uses a service |
-| `settings` | _Object_ | Output name |
+| `settings` | _Object_ | Output settings |
 | `active` | _boolean_ | Output status (active or not) |
 | `reconnecting` | _boolean_ | Output reconnection status (reconnecting or not) |
 | `congestion` | _double_ | Output congestion |
@@ -945,6 +950,7 @@ The volume of a source has changed.
 | ---- | :---: | ------------|
 | `sourceName` | _String_ | Source name |
 | `volume` | _float_ | Source volume |
+| `volumeDb` | _float_ | Source volume in Decibel |
 
 
 ---
@@ -1779,6 +1785,26 @@ Executes a list of requests sequentially (one-by-one on the same thread).
 
 ---
 
+### Sleep
+
+
+- Unreleased
+
+Waits for the specified duration. Designed to be used in `ExecuteBatch` operations.
+
+**Request Fields:**
+
+| Name | Type  | Description |
+| ---- | :---: | ------------|
+| `sleepMillis` | _int_ | Delay in milliseconds to wait before continuing. |
+
+
+**Response Items:**
+
+_No additional response items._
+
+---
+
 ## Media Control
 
 ### PlayPauseMedia
@@ -1787,13 +1813,14 @@ Executes a list of requests sequentially (one-by-one on the same thread).
 - Added in v4.9.0
 
 Pause or play a media source. Supports ffmpeg and vlc media sources (as of OBS v25.0.8)
+Note :Leaving out `playPause` toggles the current pause state
 
 **Request Fields:**
 
 | Name | Type  | Description |
 | ---- | :---: | ------------|
 | `sourceName` | _String_ | Source name. |
-| `playPause` | _boolean_ | Whether to pause or play the source. `false` for play, `true` for pause. |
+| `playPause` | _boolean_ | (optional) Whether to pause or play the source. `false` for play, `true` for pause. |
 
 
 **Response Items:**
@@ -2150,6 +2177,56 @@ _No additional response items._
 
 ---
 
+### SetTracks
+
+
+- Unreleased
+
+Changes whether an audio track is active for a source.
+
+**Request Fields:**
+
+| Name | Type  | Description |
+| ---- | :---: | ------------|
+| `sourceName` | _String_ | Source name. |
+| `track` | _int_ | Audio tracks 1-6. |
+| `active` | _boolean_ | Whether audio track is active or not. |
+
+
+**Response Items:**
+
+_No additional response items._
+
+---
+
+### GetTracks
+
+
+- Unreleased
+
+Gets whether an audio track is active for a source.
+
+**Request Fields:**
+
+| Name | Type  | Description |
+| ---- | :---: | ------------|
+| `sourceName` | _String_ | Source name. |
+
+
+**Response Items:**
+
+| Name | Type  | Description |
+| ---- | :---: | ------------|
+| `track1` | _boolean_ |  |
+| `track2` | _boolean_ |  |
+| `track3` | _boolean_ |  |
+| `track4` | _boolean_ |  |
+| `track5` | _boolean_ |  |
+| `track6` | _boolean_ |  |
+
+
+---
+
 ### GetMute
 
 
@@ -2212,6 +2289,29 @@ Inverts the mute status of a specified source.
 **Response Items:**
 
 _No additional response items._
+
+---
+
+### GetSourceActive
+
+
+- Unreleased
+
+Get the source's active status of a specified source (if it is showing in the final mix).
+
+**Request Fields:**
+
+| Name | Type  | Description |
+| ---- | :---: | ------------|
+| `sourceName` | _String_ | Source name. |
+
+
+**Response Items:**
+
+| Name | Type  | Description |
+| ---- | :---: | ------------|
+| `sourceActive` | _boolean_ | Source active status of the source. |
+
 
 ---
 
@@ -3456,6 +3556,7 @@ Coordinates are relative to the item's parent (the scene or group it belongs to)
 | `rotation` | _double_ | The clockwise rotation of the item in degrees around the point of alignment. |
 | `scale.x` | _double_ | The x-scale factor of the source. |
 | `scale.y` | _double_ | The y-scale factor of the source. |
+| `scale.filter` | _String_ | The scale filter of the source. Can be "OBS_SCALE_DISABLE", "OBS_SCALE_POINT", "OBS_SCALE_BICUBIC", "OBS_SCALE_BILINEAR", "OBS_SCALE_LANCZOS" or "OBS_SCALE_AREA". |
 | `crop.top` | _int_ | The number of pixels cropped off the top of the source before scaling. |
 | `crop.right` | _int_ | The number of pixels cropped off the right of the source before scaling. |
 | `crop.bottom` | _int_ | The number of pixels cropped off the bottom of the source before scaling. |
@@ -3499,6 +3600,7 @@ Coordinates are relative to the item's parent (the scene or group it belongs to)
 | `rotation` | _double (optional)_ | The new clockwise rotation of the item in degrees. |
 | `scale.x` | _double (optional)_ | The new x scale of the item. |
 | `scale.y` | _double (optional)_ | The new y scale of the item. |
+| `scale.filter` | _String (optional)_ | The new scale filter of the source. Can be "OBS_SCALE_DISABLE", "OBS_SCALE_POINT", "OBS_SCALE_BICUBIC", "OBS_SCALE_BILINEAR", "OBS_SCALE_LANCZOS" or "OBS_SCALE_AREA". |
 | `crop.top` | _int (optional)_ | The new amount of pixels cropped off the top of the source before scaling. |
 | `crop.bottom` | _int (optional)_ | The new amount of pixels cropped off the bottom of the source before scaling. |
 | `crop.left` | _int (optional)_ | The new amount of pixels cropped off the left of the source before scaling. |

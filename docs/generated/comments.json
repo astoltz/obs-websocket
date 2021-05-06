@@ -127,6 +127,7 @@
         "{double} `rotation` The clockwise rotation of the scene item in degrees around the point of alignment.",
         "{double} `scale.x` The x-scale factor of the scene item.",
         "{double} `scale.y` The y-scale factor of the scene item.",
+        "{String} `scale.filter` The scale filter of the source. Can be \"OBS_SCALE_DISABLE\", \"OBS_SCALE_POINT\", \"OBS_SCALE_BICUBIC\", \"OBS_SCALE_BILINEAR\", \"OBS_SCALE_LANCZOS\" or \"OBS_SCALE_AREA\".",
         "{int} `crop.top` The number of pixels cropped off the top of the scene item before scaling.",
         "{int} `crop.right` The number of pixels cropped off the right of the scene item before scaling.",
         "{int} `crop.bottom` The number of pixels cropped off the bottom of the scene item before scaling.",
@@ -174,6 +175,11 @@
           "type": "double",
           "name": "scale.y",
           "description": "The y-scale factor of the scene item."
+        },
+        {
+          "type": "String",
+          "name": "scale.filter",
+          "description": "The scale filter of the source. Can be \"OBS_SCALE_DISABLE\", \"OBS_SCALE_POINT\", \"OBS_SCALE_BICUBIC\", \"OBS_SCALE_BILINEAR\", \"OBS_SCALE_LANCZOS\" or \"OBS_SCALE_AREA\"."
         },
         {
           "type": "int",
@@ -360,7 +366,7 @@
         "{boolean} `flags.encoded` Output is encoded",
         "{boolean} `flags.multiTrack` Output uses several audio tracks",
         "{boolean} `flags.service` Output uses a service",
-        "{Object} `settings` Output name",
+        "{Object} `settings` Output settings",
         "{boolean} `active` Output status (active or not)",
         "{boolean} `reconnecting` Output reconnection status (reconnecting or not)",
         "{double} `congestion` Output congestion",
@@ -427,7 +433,7 @@
         {
           "type": "Object",
           "name": "settings",
-          "description": "Output name"
+          "description": "Output settings"
         },
         {
           "type": "boolean",
@@ -2112,7 +2118,8 @@
         "description": "The volume of a source has changed.",
         "return": [
           "{String} `sourceName` Source name",
-          "{float} `volume` Source volume"
+          "{float} `volume` Source volume",
+          "{float} `volumeDb` Source volume in Decibel"
         ],
         "api": "events",
         "name": "SourceVolumeChanged",
@@ -2128,6 +2135,11 @@
             "type": "float",
             "name": "volume",
             "description": "Source volume"
+          },
+          {
+            "type": "float",
+            "name": "volumeDb",
+            "description": "Source volume in Decibel"
           }
         ],
         "names": [
@@ -4389,15 +4401,56 @@
         "lead": "",
         "type": "class",
         "examples": []
+      },
+      {
+        "subheads": [],
+        "description": "Waits for the specified duration. Designed to be used in `ExecuteBatch` operations.",
+        "param": "{int} `sleepMillis` Delay in milliseconds to wait before continuing.",
+        "api": "requests",
+        "name": "Sleep",
+        "category": "general",
+        "since": "unreleased",
+        "params": [
+          {
+            "type": "int",
+            "name": "sleepMillis",
+            "description": "Delay in milliseconds to wait before continuing."
+          }
+        ],
+        "names": [
+          {
+            "name": "",
+            "description": "Sleep"
+          }
+        ],
+        "categories": [
+          {
+            "name": "",
+            "description": "general"
+          }
+        ],
+        "sinces": [
+          {
+            "name": "",
+            "description": "unreleased"
+          }
+        ],
+        "heading": {
+          "level": 2,
+          "text": "Sleep"
+        },
+        "lead": "",
+        "type": "class",
+        "examples": []
       }
     ],
     "media control": [
       {
         "subheads": [],
-        "description": "Pause or play a media source. Supports ffmpeg and vlc media sources (as of OBS v25.0.8)",
+        "description": "Pause or play a media source. Supports ffmpeg and vlc media sources (as of OBS v25.0.8)\nNote :Leaving out `playPause` toggles the current pause state",
         "param": [
           "{String} `sourceName` Source name.",
-          "{boolean} `playPause` Whether to pause or play the source. `false` for play, `true` for pause."
+          "{boolean} `playPause` (optional) Whether to pause or play the source. `false` for play, `true` for pause."
         ],
         "api": "requests",
         "name": "PlayPauseMedia",
@@ -4412,7 +4465,7 @@
           {
             "type": "boolean",
             "name": "playPause",
-            "description": "Whether to pause or play the source. `false` for play, `true` for pause."
+            "description": "(optional) Whether to pause or play the source. `false` for play, `true` for pause."
           }
         ],
         "names": [
@@ -5292,6 +5345,142 @@
       },
       {
         "subheads": [],
+        "description": "Changes whether an audio track is active for a source.",
+        "param": [
+          "{String} `sourceName` Source name.",
+          "{int} `track` Audio tracks 1-6.",
+          "{boolean} `active` Whether audio track is active or not."
+        ],
+        "api": "requests",
+        "name": "SetTracks",
+        "category": "sources",
+        "since": "unreleased",
+        "params": [
+          {
+            "type": "String",
+            "name": "sourceName",
+            "description": "Source name."
+          },
+          {
+            "type": "int",
+            "name": "track",
+            "description": "Audio tracks 1-6."
+          },
+          {
+            "type": "boolean",
+            "name": "active",
+            "description": "Whether audio track is active or not."
+          }
+        ],
+        "names": [
+          {
+            "name": "",
+            "description": "SetTracks"
+          }
+        ],
+        "categories": [
+          {
+            "name": "",
+            "description": "sources"
+          }
+        ],
+        "sinces": [
+          {
+            "name": "",
+            "description": "unreleased"
+          }
+        ],
+        "heading": {
+          "level": 2,
+          "text": "SetTracks"
+        },
+        "lead": "",
+        "type": "class",
+        "examples": []
+      },
+      {
+        "subheads": [],
+        "description": "Gets whether an audio track is active for a source.",
+        "param": "{String} `sourceName` Source name.",
+        "return": [
+          "{boolean} `track1`",
+          "{boolean} `track2`",
+          "{boolean} `track3`",
+          "{boolean} `track4`",
+          "{boolean} `track5`",
+          "{boolean} `track6`"
+        ],
+        "api": "requests",
+        "name": "GetTracks",
+        "category": "sources",
+        "since": "unreleased",
+        "returns": [
+          {
+            "type": "boolean",
+            "name": "track1",
+            "description": ""
+          },
+          {
+            "type": "boolean",
+            "name": "track2",
+            "description": ""
+          },
+          {
+            "type": "boolean",
+            "name": "track3",
+            "description": ""
+          },
+          {
+            "type": "boolean",
+            "name": "track4",
+            "description": ""
+          },
+          {
+            "type": "boolean",
+            "name": "track5",
+            "description": ""
+          },
+          {
+            "type": "boolean",
+            "name": "track6",
+            "description": ""
+          }
+        ],
+        "params": [
+          {
+            "type": "String",
+            "name": "sourceName",
+            "description": "Source name."
+          }
+        ],
+        "names": [
+          {
+            "name": "",
+            "description": "GetTracks"
+          }
+        ],
+        "categories": [
+          {
+            "name": "",
+            "description": "sources"
+          }
+        ],
+        "sinces": [
+          {
+            "name": "",
+            "description": "unreleased"
+          }
+        ],
+        "heading": {
+          "level": 2,
+          "text": "GetTracks"
+        },
+        "lead": "",
+        "type": "class",
+        "examples": []
+      },
+      {
+        "subheads": [],
         "description": "Get the mute status of a specified source.",
         "param": "{String} `source` Source name.",
         "return": [
@@ -5432,6 +5621,55 @@
         "heading": {
           "level": 2,
           "text": "ToggleMute"
+        },
+        "lead": "",
+        "type": "class",
+        "examples": []
+      },
+      {
+        "subheads": [],
+        "description": "Get the source's active status of a specified source (if it is showing in the final mix).",
+        "param": "{String} `sourceName` Source name.",
+        "return": "{boolean} `sourceActive` Source active status of the source.",
+        "api": "requests",
+        "name": "GetSourceActive",
+        "category": "sources",
+        "since": "unreleased",
+        "returns": [
+          {
+            "type": "boolean",
+            "name": "sourceActive",
+            "description": "Source active status of the source."
+          }
+        ],
+        "params": [
+          {
+            "type": "String",
+            "name": "sourceName",
+            "description": "Source name."
+          }
+        ],
+        "names": [
+          {
+            "name": "",
+            "description": "GetSourceActive"
+          }
+        ],
+        "categories": [
+          {
+            "name": "",
+            "description": "sources"
+          }
+        ],
+        "sinces": [
+          {
+            "name": "",
+            "description": "unreleased"
+          }
+        ],
+        "heading": {
+          "level": 2,
+          "text": "GetSourceActive"
         },
         "lead": "",
         "type": "class",
@@ -8569,6 +8807,7 @@
           "{double} `rotation` The clockwise rotation of the item in degrees around the point of alignment.",
           "{double} `scale.x` The x-scale factor of the source.",
           "{double} `scale.y` The y-scale factor of the source.",
+          "{String} `scale.filter` The scale filter of the source. Can be \"OBS_SCALE_DISABLE\", \"OBS_SCALE_POINT\", \"OBS_SCALE_BICUBIC\", \"OBS_SCALE_BILINEAR\", \"OBS_SCALE_LANCZOS\" or \"OBS_SCALE_AREA\".",
           "{int} `crop.top` The number of pixels cropped off the top of the source before scaling.",
           "{int} `crop.right` The number of pixels cropped off the right of the source before scaling.",
           "{int} `crop.bottom` The number of pixels cropped off the bottom of the source before scaling.",
@@ -8631,6 +8870,11 @@
             "type": "double",
             "name": "scale.y",
             "description": "The y-scale factor of the source."
+          },
+          {
+            "type": "String",
+            "name": "scale.filter",
+            "description": "The scale filter of the source. Can be \"OBS_SCALE_DISABLE\", \"OBS_SCALE_POINT\", \"OBS_SCALE_BICUBIC\", \"OBS_SCALE_BILINEAR\", \"OBS_SCALE_LANCZOS\" or \"OBS_SCALE_AREA\"."
           },
           {
             "type": "int",
@@ -8780,6 +9024,7 @@
           "{double (optional)} `rotation` The new clockwise rotation of the item in degrees.",
           "{double (optional)} `scale.x` The new x scale of the item.",
           "{double (optional)} `scale.y` The new y scale of the item.",
+          "{String (optional)} `scale.filter` The new scale filter of the source. Can be \"OBS_SCALE_DISABLE\", \"OBS_SCALE_POINT\", \"OBS_SCALE_BICUBIC\", \"OBS_SCALE_BILINEAR\", \"OBS_SCALE_LANCZOS\" or \"OBS_SCALE_AREA\".",
           "{int (optional)} `crop.top` The new amount of pixels cropped off the top of the source before scaling.",
           "{int (optional)} `crop.bottom` The new amount of pixels cropped off the bottom of the source before scaling.",
           "{int (optional)} `crop.left` The new amount of pixels cropped off the left of the source before scaling.",
@@ -8845,6 +9090,11 @@
             "type": "double (optional)",
             "name": "scale.y",
             "description": "The new y scale of the item."
+          },
+          {
+            "type": "String (optional)",
+            "name": "scale.filter",
+            "description": "The new scale filter of the source. Can be \"OBS_SCALE_DISABLE\", \"OBS_SCALE_POINT\", \"OBS_SCALE_BICUBIC\", \"OBS_SCALE_BILINEAR\", \"OBS_SCALE_LANCZOS\" or \"OBS_SCALE_AREA\"."
           },
           {
             "type": "int (optional)",
