@@ -70,6 +70,7 @@ add_library(obs-websocket MODULE
 	${obs-websocket_HEADERS})
 
 include_directories(
+	"${LIBOBS_INCLUDE_DIR}"
 	"${LIBOBS_INCLUDE_DIR}/../UI/obs-frontend-api"
 	${Qt5Core_INCLUDES}
 	${Qt5Widgets_INCLUDES}
@@ -77,7 +78,7 @@ include_directories(
 	"${CMAKE_SOURCE_DIR}/deps/websocketpp")
 
 target_link_libraries(obs-websocket
-	libobs
+	${LIBOBS_LIB}
 	Qt5::Core
 	Qt5::Widgets)
 
